@@ -13,6 +13,11 @@ const props = defineProps({
     required: true,
     default: "",
   },
+  urls: {
+    type: JSON,
+    required: true,
+    default: [],
+  },
   type: {
     type: String,
     default: "image",
@@ -37,9 +42,11 @@ const panorama = shallowRef(null);
 const source = ref(null);
 const type = ref(props.type ?? "image");
 const containerV = ref(null);
+const userPointsInterface = ref(props.urls.urls ?? []);
+const currentId = ref(props.urls.index ?? 0);
 
 
-const emit = defineEmits(['gotoClick'])
+const emit = defineEmits(['gotoClick', 'update_datas'])
 
 watch(
   () => props.source.src,
@@ -49,6 +56,17 @@ watch(
     loadPano();
   }
 );
+
+
+watch(
+  userPointsInterface, (newValue, oldValue) => {
+    //loadPano(newValue);
+    emit('update-urls', newValue);
+    props.source = userPointsInterface.value[currentId.value]
+    loadPano();
+  }
+);
+
 onMounted(() => {
   source.value = props.source.src ?? "" 
   window.addEventListener("resize", onResize, false);
@@ -89,9 +107,9 @@ const onResize = () => {
 const setPano = (pano) => {
   if (!pano) return;
 
-  if (panorama.value) {
-    viewer.value = null;
-  }
+  // if (panorama.value) {
+  //   viewer.value = null;
+  // }
 
   panorama.value = pano;
 
@@ -107,14 +125,13 @@ const setPano = (pano) => {
         data.positionY,
         data.positionZ
       );
-      console.log("Hotspot created:", hotspotTarget);
       panorama.value.add(hotspotTarget);
-      console.log("Hotspot added to viewer:", viewer.value);
       hotspotTarget.addEventListener("click", () => {
         emit('gotoClick', data.target)
       });
     });
   }
+  console.log()
   viewer.value.add(panorama.value);
   viewer.value.setPanorama(panorama.value);
 
@@ -154,25 +171,72 @@ onUnmounted(() => {
   }
 });
 
-const onContainerClick = () => { // MouseEvent
-  if (!viewer.value || !panorama.value) return;
+const onContainerClick = async (event) => { // MouseEvent
+  if(!event.shiftKey){ return 0;}
+
+  if (!viewer.value || !panorama.value) {
+    return;
+  }
 
   const mouse = new THREE.Vector2();
-  const rect = containerV.value.getBoundingClientRect();
   mouse.x = ((viewer.value.userMouse.x ) / window.innerWidth) * 2 ;
   mouse.y = - ((viewer.value.userMouse.y )/ window.innerHeight) * 2 ;
 
-  // viewer.value.raycaster.setFromCamera(mouse, viewer.value.camera);
-
-  // Pass panorama.value as an array
   const intersects = viewer.value.raycaster.intersectObjects([panorama.value], true);
 
   if (intersects.length > 0) {
     const intersect = intersects[0];
     const worldVector = intersect.point;
-    console.log(`World Coordinates: x=${worldVector.x * -1}, y=${worldVector.y}, z=${worldVector.z}`);
+    
+    console.log(`World Coordinates: x=${worldVector.x * -1}, y=${worldVector.y}, z=${worldVector.z}`, userPointsInterface.value[currentId.value], props.urls);
+    const imgsrc = prompt("Image URL ");
+    const target = userPointsInterface.value.findIndex((image) => image.src === imgsrc);
+
+    userPointsInterface.value[currentId.value].infoSpot.push(
+      {
+            data : 512,
+            icon : hotspotIcons[0].data,
+            showable : true,
+            positionX : worldVector.x * -1,
+            positionY : worldVector.y,
+            positionZ : worldVector.z,
+            target : target !== -1 ? target :  userPointsInterface.value.length
+      }
+    );
+    if(target === -1){
+      userPointsInterface.value.push({
+        src : imgsrc,
+        infoSpot : []
+      })
+    }
+    loadPano();
+    // props.source = userPointsInterface.value[currentId.value]
+    // console.log(props.source);
+    // loadPano();
+    // const { value: imagelink } = await Swal.fire({
+    //   input : 'text',
+    //   inputLabel: "Source Link",
+    // });
+    // if (imagelink) {
+    //   userPointsInterface.value.push(
+    //     { 
+    //       src : imagelink,
+    //       x : worldVector.x * -1,
+    //       y : worldVector.y,
+    //       z : worldVector.z,
+    //       icon : hotspotIcons[0].data,
+    //       data : 512,
+    //       icon : hotspotIcons[0].data,
+    //       showable : true,
+    //       target : 1
+    //     }
+    //   );
+    // }
+    // console.log(userPointsInterface.value);
   }
 };
+
+
 
 </script>
 

@@ -1,7 +1,7 @@
 <template>
   <div style="width: 100vw;height: 100dvh;">
     <ClientOnly >
-        <Panopage :key="index" :source="urls[index]" @goto-click="saythename"></Panopage> 
+        <Panopage :key="index" :source="urls[index]" @goto-click="saythename" :urls="{urls : urls, index: index}" @update-urls="change_links"></Panopage> 
     </ClientOnly>
   </div> 
 </template>
@@ -25,24 +25,6 @@ const urls = ref([
             positionZ : -4076.57,
             target : 1
           },
-          {
-            data : 512,
-            icon : hotspotIcons[0].data,
-            showable : true,
-            positionX : -3029.96,
-            positionY : -1850.70,
-            positionZ : -3512.02,
-            target : 1
-          },
-          {
-            data : 512,
-            icon : hotspotIcons[0].data,
-            showable : true,
-            positionX : 1696.8607843275722,
-            positionY : -1057.7833460743316,
-            positionZ : -4572.53,
-            target : 1
-          }
          ]
         },
         {
@@ -85,6 +67,11 @@ const saythename =(data)=>{
   console.log(data)
   index.value = data
   console.log("CHANGES")
+}
+
+const change_links = (data)=>{
+  console.log(data)
+  urls.value = data;
 }
 
 </script>

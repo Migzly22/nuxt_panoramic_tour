@@ -23,6 +23,12 @@ export default defineNuxtConfig({
           tagPosition : 'head',
           async : true
         },
+        {
+          src : 'https://cdn.jsdelivr.net/npm/sweetalert2@11',
+          tagPosition : 'head',
+          async : true,
+          defer : true
+        },
       ]
     }
   },
