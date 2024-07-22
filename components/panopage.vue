@@ -1,21 +1,17 @@
 <template>
-  <div class="v-pano" ref="containerV"></div>
+  <div class="v-pano" ref="containerV" @click="onContainerClick"></div>
 </template>
 
 <script setup>
 import { hotspotIcons } from "~/composables/modules/hotspoticon";
 import * as PanoLens from "./assets/lib/panolens";
+import * as THREE from 'three';
 
 const props = defineProps({
   source: {
     type: String,
     required: true,
     default: "",
-  },
-  hotspots: {
-    type: Array,
-    required: false,
-    default: [],
   },
   type: {
     type: String,
@@ -36,8 +32,8 @@ const size = ref({
   height: props.height ?? 100,
 });
 
-const viewer = ref(null);
-const panorama = ref(null);
+const viewer = shallowRef(null);
+const panorama = shallowRef(null);
 const source = ref(null);
 const type = ref(props.type ?? "image");
 const containerV = ref(null);
@@ -54,7 +50,7 @@ watch(
   }
 );
 onMounted(() => {
-    source.value = props.source.src ?? "" 
+  source.value = props.source.src ?? "" 
   window.addEventListener("resize", onResize, false);
   if (size.value.width === undefined || size.value.height === undefined) {
     size.value = {
@@ -73,6 +69,7 @@ onMounted(() => {
   //viewer.value.add()
 
   loadPano();
+  // containerV.value.addEventListener("click", onContainerClick, false);
 });
 
 const onResize = () => {
@@ -157,12 +154,31 @@ onUnmounted(() => {
   }
 });
 
+const onContainerClick = () => { // MouseEvent
+  if (!viewer.value || !panorama.value) return;
+
+  const mouse = new THREE.Vector2();
+  const rect = containerV.value.getBoundingClientRect();
+  mouse.x = ((viewer.value.userMouse.x ) / window.innerWidth) * 2 ;
+  mouse.y = - ((viewer.value.userMouse.y )/ window.innerHeight) * 2 ;
+
+  // viewer.value.raycaster.setFromCamera(mouse, viewer.value.camera);
+
+  // Pass panorama.value as an array
+  const intersects = viewer.value.raycaster.intersectObjects([panorama.value], true);
+
+  if (intersects.length > 0) {
+    const intersect = intersects[0];
+    const worldVector = intersect.point;
+    console.log(`World Coordinates: x=${worldVector.x * -1}, y=${worldVector.y}, z=${worldVector.z}`);
+  }
+};
 
 </script>
 
 <style scoped>
     .v-pano{
         width: 100%;
-        height: 100dvh;
+        height: 100%;
     }
 </style>

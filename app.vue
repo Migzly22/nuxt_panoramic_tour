@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="width: 100vw;height: 100dvh;">
     <ClientOnly >
         <Panopage :key="index" :source="urls[index]" @goto-click="saythename"></Panopage> 
     </ClientOnly>
@@ -10,6 +10,7 @@
 
 import { ref, onMounted } from "vue";
 import { hotspotIcons } from "./composables/modules/hotspoticon";
+
 
 
 const urls = ref([
@@ -28,15 +29,33 @@ const urls = ref([
             data : 512,
             icon : hotspotIcons[0].data,
             showable : true,
+            positionX : -3029.96,
+            positionY : -1850.70,
+            positionZ : -3512.02,
+            target : 1
+          },
+          {
+            data : 512,
+            icon : hotspotIcons[0].data,
+            showable : true,
+            positionX : 1696.8607843275722,
+            positionY : -1057.7833460743316,
+            positionZ : -4572.53,
+            target : 1
+          }
+         ]
+        },
+        {
+          src :'/_nuxt/assets/image/panorama3.jpg',
+          infoSpot : [ {
+            data : 512,
+            icon : hotspotIcons[0].data,
+            showable : true,
             positionX : 4509.38,
             positionY : -2094.06,
             positionZ :-486.08,
             target : 0
           }]
-        },
-        {
-          src :'/_nuxt/assets/image/panorama3.jpg',
-          infoSpot : []
         },
       ]);
 const index = ref(0);
